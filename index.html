@@ -72,6 +72,18 @@ async function join(code,host){
   roomCode=code.toUpperCase();isHost=host;myId=uid();phase="lobby";round=1;actions={};gameOver=false;locked=false;roundLog=[];stateVersion=0;
   const name=$("nickname").value.trim()||"プレイヤー";
   players=[{id:myId,name,color:0,hp:10,energy:5,score:0,online:true,peerId:null}];
+  try {
+  if (!joinRoom) {
+    const mod = await import("https://esm.sh/@trystero-p2p/torrent");
+    joinRoom = mod.joinRoom;
+    if (typeof joinRoom !== "function") {
+      throw new Error("joinRoom が見つかりません");
+    }
+  }
+} catch (e) {
+  alert("通信ライブラリの読み込みに失敗したよ: " + (e?.message || e));
+  return;
+}
   try{room=joinRoom({appId:"mind-wars-online-demo-v1"},roomCode)}catch(e){alert("通信を開始できなかったよ。ページを再読み込みして試してね。");return}
   [sendLobby,getLobby]=room.makeAction("lobby");
   [sendIntent,getIntent]=room.makeAction("intent");
