@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101326">
+<title>マインドウォーズ Online</title>
+<style>
+:root{--bg:#101326;--panel:#1a1f3a;--ink:#f6f7ff;--muted:#aeb6d7;--gold:#ffd166;--red:#ff637d;--blue:#63b3ff;--yellow:#ffe16a;--green:#68e0b2}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#252d58 0,#101326 58%);color:var(--ink);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Noto Sans JP",sans-serif;min-height:100vh}
+main{max-width:780px;margin:auto;padding:18px 14px 40px}.brand{text-align:center;margin:8px 0 20px}.brand .logo{font-size:36px}.brand h1{margin:2px 0;font-size:clamp(25px,7vw,38px);letter-spacing:.04em}.brand p{color:var(--muted);margin:4px 0;font-size:13px}
+.card{background:linear-gradient(145deg,rgba(35,42,75,.96),rgba(24,29,54,.96));border:1px solid #394267;border-radius:18px;padding:16px;margin:12px 0;box-shadow:0 12px 35px #0002}
+h2{font-size:18px;margin:0 0 12px}label{display:block;font-size:13px;color:var(--muted);margin:10px 0 5px}input,select,button{font:inherit;border-radius:12px;border:1px solid #4b557f;padding:12px;background:#11162c;color:var(--ink);width:100%}button{background:linear-gradient(135deg,#7c6cff,#4b73ff);border:0;font-weight:750;cursor:pointer;min-height:46px}button.secondary{background:#30395f;border:1px solid #58638e}button.warn{background:#a53f59}button:disabled{opacity:.45;cursor:not-allowed}.row{display:flex;gap:9px}.row>*{flex:1;min-width:0}.muted{color:var(--muted);font-size:13px;line-height:1.55}.hidden{display:none!important}.room-code{font-size:30px;letter-spacing:.18em;font-weight:900;color:var(--gold);text-align:center;padding:8px}.status{border-radius:12px;padding:10px;background:#11162c;color:var(--muted);font-size:13px}.players{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.player{padding:10px;border-radius:14px;background:#11162c;border:1px solid #353f67;min-width:0}.player .name{font-weight:800;overflow-wrap:anywhere}.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px}.stats{font-size:12px;color:var(--muted);line-height:1.7;margin-top:8px}.bar{height:6px;border-radius:10px;background:#303652;overflow:hidden;margin-top:4px}.bar span{display:block;height:100%;background:var(--green)}.actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.action{background:#11162c;border:1px solid #414b75;text-align:left;padding:12px;min-height:82px}.action strong{display:block;font-size:15px}.action small{display:block;color:var(--muted);margin-top:5px;line-height:1.4}.action.selected{outline:2px solid var(--gold);border-color:var(--gold);background:#292746}.feed{display:flex;flex-direction:column;gap:7px}.feed div{background:#11162c;padding:10px;border-radius:10px;font-size:13px;line-height:1.5}.tag{display:inline-block;background:#343d65;border-radius:99px;padding:4px 9px;font-size:12px;color:#dce1ff}.footer{text-align:center;color:#7f89b2;font-size:11px;margin-top:18px}@media(max-width:460px){main{padding:12px 10px 28px}.card{padding:13px}.players{gap:5px}.player{padding:8px}.player .name{font-size:13px}.stats{font-size:11px}.row{gap:6px}.room-code{font-size:25px}}
+</style>
+</head>
+<body><main>
+<header class="brand"><div class="logo">🧠⚔️</div><h1>MIND WARS</h1><p>3人対戦・心理戦オンラインゲーム</p></header>
+<section id="home" class="card">
+<h2>🎮 ゲームに参加</h2>
+<label for="nickname">ニックネーム</label><input id="nickname" maxlength="14" placeholder="例：プレイヤー1">
+<div class="row" style="margin-top:12px"><button id="createBtn">ルームを作る</button><button id="showJoin" class="secondary">コードで参加</button></div>
+<div id="joinArea" class="hidden"><label for="joinCode">参加コード</label><input id="joinCode" maxlength="6" placeholder="6文字のコード" autocapitalize="characters"><button id="joinBtn" style="margin-top:8px">参加する</button></div>
+<p class="muted" style="margin-bottom:0">同じコードを友達に送ってね。最大3人で対戦できるよ。</p>
+</section>
+<section id="lobby" class="card hidden">
+<div class="row" style="align-items:center"><h2 style="flex:1">🛡️ ロビー</h2><span id="connectionTag" class="tag">接続中…</span></div>
+<div class="room-code" id="roomCodeDisplay">------</div>
+<div class="row"><button id="copyCode" class="secondary">コードをコピー</button><button id="leaveBtn" class="warn">退出</button></div>
+<p class="muted">友達はトップ画面でニックネームとこのコードを入力して参加！</p>
+<div id="lobbyPlayers" class="players"></div>
+<div id="lobbyStatus" class="status" style="margin-top:12px">参加者を待っています…</div>
+<button id="startBtn" style="margin-top:12px" disabled>3人そろったらゲーム開始</button>
+</section>
+<section id="game" class="hidden">
+<div class="card"><div class="row" style="align-items:center"><h2 style="flex:1">⚔️ バトルフィールド</h2><span id="roundTag" class="tag">ROUND 1</span></div><div id="players" class="players"></div><div id="gameStatus" class="status" style="margin-top:12px"></div></div>
+<div id="chooseCard" class="card"><h2>🤫 秘密の作戦を選ぶ</h2><p class="muted">作戦とターゲットは他の人には見えないよ。全員がロックすると結果が公開される！</p>
+<div class="actions" id="actionButtons">
+<button class="action selected" data-action="attack"><strong>⚔️ 攻撃</strong><small>EN −2 / 3ダメージ、命中で1pt</small></button>
+<button class="action" data-action="defend"><strong>🛡️ 防御</strong><small>EN −1 / 攻撃と奪取を防ぐ</small></button>
+<button class="action" data-action="charge"><strong>⚡ チャージ</strong><small>EN ＋3（最大8）</small></button>
+<button class="action" data-action="steal"><strong>🌀 奪取</strong><small>EN −3 / 最大2奪い、成功で1pt</small></button>
+<button class="action" data-action="heal"><strong>💚 回復</strong><small>EN −2 / HP ＋3（最大10）</small></button>
+</div>
+<label for="target">ターゲット（攻撃・奪取のみ）</label><select id="target"></select>
+<button id="lockBtn" style="margin-top:12px">この作戦をロックする</button><p id="actionHint" class="muted"></p></div>
+<div id="lockedCard" class="card hidden"><h2>🔒 作戦ロック済み</h2><p>作戦はロックされたよ。他のプレイヤーの決定を待とう！</p><div class="status" id="lockedStatus"></div></div>
+<div class="card"><h2>📜 ラウンドログ</h2><div class="feed" id="feed"><div>対戦が始まったらここに結果が表示されるよ。</div></div></div>
+<div id="endCard" class="card hidden"><h2>🏆 ゲーム終了</h2><div id="endText"></div><button id="rematchBtn" style="margin-top:12px">新しいルームで再戦</button></div>
+</section>
+<section class="card"><h2>📘 ルール</h2><p class="muted">3人で同時に秘密の作戦を選ぶ心理戦！全員HP10・エネルギー5・ポイント0でスタート。HPは最大10、エネルギーは最大8。攻撃はエネルギー2で3ダメージ、命中で1pt。防御はエネルギー1でそのラウンドの攻撃・奪取を防ぐ。チャージはエネルギーを3回復。奪取はエネルギー3で相手から最大2奪い、成功で1pt。回復はエネルギー2でHPを3回復。回復後に攻撃ダメージを処理。HP0で脱落。5pt到達、最後の生存者、または15ラウンド終了時の最高得点で勝利。</p></section>
+<div class="footer">Mind Wars Online • ブラウザ試作版 • 接続にはインターネットが必要です</div>
+</main>
+<script type="module">
+import { joinRoom } from "https://esm.sh/trystero/torrent";
+const $=id=>document.getElementById(id);
+const COLORS=["#ff637d","#63b3ff","#ffe16a"];
+const COST={attack:2,defend:1,charge:0,steal:3,heal:2};
+const LABEL={attack:"攻撃",defend:"防御",charge:"チャージ",steal:"奪取",heal:"回復"};
+let room=null, roomCode="", myId="", isHost=false, phase="home", round=1, actions={}, chosen="attack", targetId="", gameOver=false, locked=false, players=[], peerIds=[], stateVersion=0, roundLog=[];
+let sendLobby,getLobby,sendIntent,getIntent,sendStart,getStart,sendResult,getResult,sendLock,getLock;
+const uid=()=>Math.random().toString(36).slice(2,10);
+const codegen=()=>Math.random().toString(36).slice(2,8).toUpperCase();
+function playerById(id){return players.find(p=>p.id===id)}
+function living(){return players.filter(p=>p.hp>0)}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function show(id){$(id).classList.remove("hidden")} function hide(id){$(id).classList.add("hidden")}
+function log(msg){roundLog.unshift(msg);roundLog=roundLog.slice(0,8);$("feed").innerHTML=roundLog.map(x=>`<div>${escapeHtml(x)}</div>`).join("")}
+function currentSnapshot(){return {type:"state",players,phase,round,gameOver,roundLog,version:++stateVersion,lockedIds:Object.keys(actions),endText:$("endText").textContent}}
+function broadcast(){if(!isHost)return;const s=currentSnapshot();sendLobby(s);sendResult(s);renderLobby();if(phase==="game")renderGame()}
+function join(code,host){
+  if(room){try{room.leave()}catch(e){}}
+  roomCode=code.toUpperCase();isHost=host;myId=uid();phase="lobby";round=1;actions={};gameOver=false;locked=false;roundLog=[];stateVersion=0;
+  const name=$("nickname").value.trim()||"プレイヤー";
+  players=[{id:myId,name,color:0,hp:10,energy:5,score:0,online:true,peerId:null}];
+  try{room=joinRoom({appId:"mind-wars-online-demo-v1"},roomCode)}catch(e){alert("通信を開始できなかったよ。ページを再読み込みして試してね。");return}
+  [sendLobby,getLobby]=room.makeAction("lobby");
+  [sendIntent,getIntent]=room.makeAction("intent");
+  [sendStart,getStart]=room.makeAction("start");
+  [sendResult,getResult]=room.makeAction("result");
+  [sendLock,getLock]=room.makeAction("lock");
+  room.onPeerJoin(peerId=>{if(!isHost)return;if(!players.some(p=>p.peerId===peerId)&&players.length<3&&phase==="lobby"){if(!peerIds.includes(peerId))peerIds.push(peerId);sendLobby({type:"hello-request"},peerId)}});
+  room.onPeerLeave(peerId=>{peerIds=peerIds.filter(x=>x!==peerId);if(isHost){const p=players.find(x=>x.peerId===peerId);if(p){p.online=false;broadcast();renderLobby()}}});
+  getLobby((data,peerId)=>{
+    if(data?.type==="hello"&&isHost){
+      const existing=players.find(p=>p.id===data.player.id);
+      if(!existing&&players.length<3&&phase==="lobby"){data.player.color=players.length;data.player.hp=10;data.player.energy=5;data.player.score=0;data.player.online=true;data.player.peerId=peerId;players.push(data.player);broadcast();renderLobby()}
+      else if(existing){existing.online=true;existing.peerId=peerId;sendLobby(currentSnapshot(),peerId)}
+    } else if(data?.type==="hello-request"&&!isHost){sendLobby({type:"hello",player:players[0]},peerId)}
+    else if(data?.type==="state"&&!isHost){applySnapshot(data)}
+  });
+  getIntent((data,peerId)=>{
+    if(!isHost||phase!=="game"||gameOver)return;
+    const p=players.find(x=>x.peerId===peerId);
+    if(!p||p.hp<=0||actions[p.id]||!legal(data.action,p,data.targetId))return;
+    actions[p.id]={action:data.action,targetId:data.targetId};
+    sendLock({type:"status",lockedIds:Object.keys(actions)});
+    if(living().every(x=>actions[x.id]))resolveRound();else broadcast();
+  });
+  getStart(data=>{if(isHost)return;if(data?.type==="begin"){players=data.players;phase="game";round=data.round||1;actions={};locked=false;gameOver=false;roundLog=data.roundLog||[];renderGame();hide("lobby");show("game")}});
+  getResult(data=>{if(isHost)return;if(data?.type==="state")applySnapshot(data)});
+  getLock(data=>{if(data?.type==="status"){if(data.lockedIds?.includes(myId)){locked=true;hide("chooseCard");show("lockedCard")}renderGame()}});
+  if(!host){sendLobby({type:"hello",player:players[0]})}
+  $("roomCodeDisplay").textContent=roomCode;show("lobby");hide("home");hide("game");renderLobby();
+  if(host)broadcast();
+}
+function applySnapshot(s){
+  if(s.version&&s.version<stateVersion)return;
+  if(s.version)stateVersion=s.version;
+  players=s.players||players;phase=s.phase||phase;round=s.round||round;gameOver=!!s.gameOver;roundLog=s.roundLog||roundLog;
+  if(s.lockedIds?.includes(myId))locked=true;else if(phase==="game")locked=false;
+  renderLobby();
+  if(phase==="game"){hide("lobby");show("game");renderGame()}
+  if(gameOver){show("endCard");hide("chooseCard");hide("lockedCard");$("endText").textContent=s.endText||"ゲーム終了！"}
+}
+function renderLobby(){
+  $("lobbyPlayers").innerHTML=players.map(p=>`<div class="player"><div class="name"><span class="dot" style="background:${COLORS[p.color]}"></span>${escapeHtml(p.name)}${p.id===myId?"（あなた）":""}</div><div class="stats">${p.online===false?"切断中":"参加中"}<br>${p.id===players[0]?.id?"ホスト":"プレイヤー"}</div></div>`).join("");
+  $("lobbyStatus").textContent=`参加人数：${players.length}/3。友達が参加するのを待ってね。`;
+  $("startBtn").disabled=!(isHost&&players.length===3);
+  $("startBtn").textContent=players.length===3?"ゲーム開始！":`あと${3-players.length}人待っています`;
+}
+function startGame(){
+  if(!isHost||players.length!==3)return;
+  phase="game";round=1;actions={};locked=false;gameOver=false;roundLog=[];
+  players.forEach(p=>{p.hp=10;p.energy=5;p.score=0;p.online=true});
+  sendStart({type:"begin",players,round,roundLog});broadcast();hide("lobby");show("game");renderGame();log("ゲーム開始！作戦を選ぼう。");broadcast();
+}
+function legal(action,p,target){
+  if(!Object.prototype.hasOwnProperty.call(COST,action)||p.energy<COST[action])return false;
+  if(["attack","steal"].includes(action)&&(!target||target===p.id||!playerById(target)||playerById(target).hp<=0))return false;
+  return true;
+}
+function renderGame(){
+  $("roundTag").textContent=`ROUND ${round}`;
+  $("players").innerHTML=players.map(p=>`<div class="player"><div class="name"><span class="dot" style="background:${COLORS[p.color]}"></span>${escapeHtml(p.name)}</div><div class="stats">❤️ HP ${p.hp}/10<br>⚡ EN ${p.energy}/8<br>⭐ ${p.score} pt${p.hp<=0?"<br>脱落":""}</div><div class="bar"><span style="width:${Math.max(0,p.hp)*10}%"></span></div></div>`).join("");
+  const me=playerById(myId);
+  if(phase==="game"&&!gameOver&&me&&me.hp>0&&!locked){show("chooseCard");hide("lockedCard");fillTargets();updateHint()}
+  else if(phase==="game"&&!gameOver&&me&&me.hp>0&&locked){hide("chooseCard");show("lockedCard");$("lockedStatus").textContent=`決定済み：他のプレイヤーを待っています。`}
+  else {hide("chooseCard");hide("lockedCard")}
+  if(gameOver){show("endCard");hide("chooseCard");hide("lockedCard")}
+  $("feed").innerHTML=roundLog.map(x=>`<div>${escapeHtml(x)}</div>`).join("")||"<div>対戦が始まったらここに結果が表示されるよ。</div>";
+  $("gameStatus").textContent=gameOver?"ゲーム終了！":`生存者 ${living().length}人。作戦を選んでロックしてね。`;
+}
+function fillTargets(){
+  const opts=players.filter(p=>p.id!==myId&&p.hp>0);
+  const old=$("target").value;
+  $("target").innerHTML=opts.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join("");
+  targetId=opts.some(p=>p.id===old)?old:(opts[0]?.id||"");
+  $("target").disabled=!["attack","steal"].includes(chosen);
+  $("lockBtn").disabled=!legal(chosen,playerById(myId)||{energy:0},targetId);
+}
+function updateHint(){
+  const me=playerById(myId);if(!me)return;
+  const cost=COST[chosen];
+  $("actionHint").textContent=`選択中：${LABEL[chosen]} / コスト ${cost} EN。あなたのENは${me.energy}。${me.energy<cost?"エネルギー不足！別の作戦を選んでね。":""}`;
+  $("lockBtn").disabled=!legal(chosen,me,targetId);
+}
+function resolveRound(){
+  const aliveAtStart=living();
+  // Pay costs and apply self-targeted effects before attacks.
+  for(const p of aliveAtStart){const a=actions[p.id];if(!a)continue;p.energy-=COST[a.action];if(a.action==="charge")p.energy=Math.min(8,p.energy+3);if(a.action==="heal")p.hp=Math.min(10,p.hp+3)}
+  // Steals resolve before attacks; defense blocks both.
+  for(const p of aliveAtStart){const a=actions[p.id];if(!a||a.action!=="steal")continue;const t=playerById(a.targetId);if(!t||t.hp<=0)continue;if(actions[t.id]?.action==="defend"){log(`${p.name}の奪取は${t.name}の防御に阻まれた！`)}else{const amount=Math.min(2,t.energy);t.energy-=amount;p.energy=Math.min(8,p.energy+amount);p.score+=1;log(`${p.name}が${t.name}からENを${amount}奪取！ (+1pt)`)}}
+  // Attacks deal simultaneous damage.
+  const damage={};
+  for(const p of aliveAtStart){const a=actions[p.id];if(!a||a.action!=="attack")continue;const t=playerById(a.targetId);if(!t||t.hp<=0)continue;if(actions[t.id]?.action==="defend"){log(`${p.name}の攻撃を${t.name}が防御！`)}else{damage[t.id]=(damage[t.id]||0)+3;p.score+=1;log(`${p.name}の攻撃が${t.name}に命中！ (+1pt)`)}}
+  for(const [id,dmg] of Object.entries(damage)){const p=playerById(id);if(p)p.hp=Math.max(0,p.hp-dmg)}
+  for(const p of aliveAtStart){const a=actions[p.id];if(!a)continue;if(a.action==="defend")log(`${p.name}は防御した。`);if(a.action==="charge")log(`${p.name}がENをチャージ！`);if(a.action==="heal")log(`${p.name}がHPを回復！`)}
+  let winner=null;const scored=players.filter(p=>p.score>=5&&p.hp>0).sort((a,b)=>b.score-a.score);if(scored.length)winner=scored[0];
+  if(!winner&&living().length===1)winner=living()[0];
+  if(winner){gameOver=true;$("endText").textContent=`🏆 ${winner.name} の勝利！ スコア ${winner.score}pt`;log(`🏆 ${winner.name}が勝利！`)}
+  else if(living().length===0){gameOver=true;const max=Math.max(...players.map(p=>p.score));const top=players.filter(p=>p.score===max);$("endText").textContent=top.length===1?`🏆 ${top[0].name} の勝利！（同時脱落・得点判定）`:"引き分け！全員が同時に脱落。";log("全員が脱落。")}
+  else if(round>=15){gameOver=true;const max=Math.max(...players.map(p=>p.score));const top=players.filter(p=>p.score===max);$("endText").textContent=top.length===1?`🏆 ${top[0].name} の勝利！ ${max}pt`:`引き分け！最高得点 ${max}pt`;log("15ラウンド終了！得点で勝敗決定。")}
+  else {round++;actions={};locked=false;for(const p of players)if(p.hp<=0)p.online=false;log(`ROUND ${round} 開始！`)}
+  broadcast();renderGame();
+}
+$("createBtn").addEventListener("click",()=>join(codegen(),true));
+$("showJoin").addEventListener("click",()=>show("joinArea"));
+$("joinBtn").addEventListener("click",()=>{const c=$("joinCode").value.trim().toUpperCase();if(c.length<4){alert("参加コードを入力してね");return}join(c,false)});
+$("copyCode").addEventListener("click",async()=>{try{await navigator.clipboard.writeText(roomCode);$("copyCode").textContent="コピーしたよ！";setTimeout(()=>$("copyCode").textContent="コードをコピー",1500)}catch(e){prompt("このコードを友達に送ってね",roomCode)}});
+$("leaveBtn").addEventListener("click",()=>{if(room){try{room.leave()}catch(e){}}room=null;resetView()});
+$("startBtn").addEventListener("click",startGame);
+$("actionButtons").addEventListener("click",e=>{const b=e.target.closest("[data-action]");if(!b||locked)return;chosen=b.dataset.action;document.querySelectorAll(".action").forEach(x=>x.classList.toggle("selected",x===b));fillTargets();updateHint()});
+$("target").addEventListener("change",()=>{targetId=$("target").value;updateHint()});
+$("lockBtn").addEventListener("click",()=>{
+  const me=playerById(myId);if(!me||locked||!legal(chosen,me,targetId))return;
+  locked=true;hide("chooseCard");show("lockedCard");$("lockedStatus").textContent="ほかのプレイヤーが作戦をロックするのを待っています…";
+  const intent={action:chosen,targetId};
+  if(isHost){actions[myId]=intent;if(living().every(p=>actions[p.id]))resolveRound();else broadcast()}
+  else {sendIntent(intent);sendLock({type:"status",lockedIds:[myId]});}
+  renderGame();
+});
+$("rematchBtn").addEventListener("click",()=>{if(room){try{room.leave()}catch(e){}}room=null;resetView();$("nickname").focus()});
+</script>
+</body>
+</html>
