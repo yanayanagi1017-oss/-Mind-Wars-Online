@@ -81,7 +81,11 @@ async function join(code,host){
     }
   }
 } catch (e) {
-  alert("通信ライブラリの読み込みに失敗したよ: " + (e?.message || e));
+  console.error("通信ライブラリの読み込みエラー:", e);
+  alert(
+    "通信ライブラリの読み込みに失敗したよ。\n" +
+    "エラー内容: " + (e?.stack || e?.message || String(e))
+  );
   return;
 }
   try{room=joinRoom({appId:"mind-wars-online-demo-v1"},roomCode)}catch(e){alert("通信を開始できなかったよ。ページを再読み込みして試してね。");return}
