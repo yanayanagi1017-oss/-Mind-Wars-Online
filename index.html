@@ -74,7 +74,7 @@ async function join(code,host){
   players=[{id:myId,name,color:0,hp:10,energy:5,score:0,online:true,peerId:null}];
   try {
   if (!joinRoom) {
-    const mod = await import("https://esm.sh/@trystero-p2p/torrent?bundle");
+    const mod = await import("https://esm.sh/@trystero-p2p/torrent@0.24.0?bundle");
     joinRoom = mod.joinRoom;
     if (typeof joinRoom !== "function") {
       throw new Error("joinRoom が見つかりません");
