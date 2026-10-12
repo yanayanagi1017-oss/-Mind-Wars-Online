@@ -188,8 +188,10 @@ function resolveRound(){
   else if(round>=15){gameOver=true;const max=Math.max(...players.map(p=>p.score));const top=players.filter(p=>p.score===max);$("endText").textContent=top.length===1?`🏆 ${top[0].name} の勝利！ ${max}pt`:`引き分け！最高得点 ${max}pt`;log("15ラウンド終了！得点で勝敗決定。")}
   else {round++;actions={};locked=false;for(const p of players)if(p.hp<=0)p.online=false;log(`ROUND ${round} 開始！`)}
   broadcast();renderGame();
-}
-$("createBtn").addEventListener("click",()=>join(codegen(),true));
+$("createBtn").addEventListener("click",()=>{
+  alert("ルーム作成を開始するよ！");
+  join(codegen(),true);
+});
 $("showJoin").addEventListener("click",()=>show("joinArea"));
 $("joinBtn").addEventListener("click",()=>{const c=$("joinCode").value.trim().toUpperCase();if(c.length<4){alert("参加コードを入力してね");return}join(c,false)});
 $("copyCode").addEventListener("click",async()=>{try{await navigator.clipboard.writeText(roomCode);$("copyCode").textContent="コピーしたよ！";setTimeout(()=>$("copyCode").textContent="コードをコピー",1500)}catch(e){prompt("このコードを友達に送ってね",roomCode)}});
