@@ -51,7 +51,7 @@ h2{font-size:18px;margin:0 0 12px}label{display:block;font-size:13px;color:var(-
 <div class="footer">Mind Wars Online • ブラウザ試作版 • 接続にはインターネットが必要です</div>
 </main>
 <script type="module">
-let joinRoom = null;
+import { joinRoom } from "https://esm.sh/@trystero-p2p/torrent";
 const $=id=>document.getElementById(id);
 const COLORS=["#ff637d","#63b3ff","#ffe16a"];
 const COST={attack:2,defend:1,charge:0,steal:3,heal:2};
@@ -67,22 +67,7 @@ function show(id){$(id).classList.remove("hidden")} function hide(id){$(id).clas
 function log(msg){roundLog.unshift(msg);roundLog=roundLog.slice(0,8);$("feed").innerHTML=roundLog.map(x=>`<div>${escapeHtml(x)}</div>`).join("")}
 function currentSnapshot(){return {type:"state",players,phase,round,gameOver,roundLog,version:++stateVersion,lockedIds:Object.keys(actions),endText:$("endText").textContent}}
 function broadcast(){if(!isHost)return;const s=currentSnapshot();sendLobby(s);sendResult(s);renderLobby();if(phase==="game")renderGame()}
-async function join(code,host){
-  const createBtn=$("createBtn");
-  if(createBtn){createBtn.disabled=true;createBtn.textContent="接続中…";}
-  try {
-    if(!joinRoom){
-      const mod = await import("https://esm.sh/trystero/torrent");
-      joinRoom = mod.joinRoom;
-      if(typeof joinRoom !== "function") throw new Error("joinRoom が見つかりません");
-    }
-  } catch(e) {
-    alert("通信ライブラリを読み込めなかったよ。インターネット接続を確認して、ページを再読み込みしてね。\n詳細: " + (e?.message || e));
-    if(createBtn){createBtn.disabled=false;createBtn.textContent="ルームを作る";}
-    return;
-  } finally {
-    if(createBtn){createBtn.disabled=false;createBtn.textContent="ルームを作る";}
-  }
+function join(code,host){
   if(room){try{room.leave()}catch(e){}}
   roomCode=code.toUpperCase();isHost=host;myId=uid();phase="lobby";round=1;actions={};gameOver=false;locked=false;roundLog=[];stateVersion=0;
   const name=$("nickname").value.trim()||"プレイヤー";
