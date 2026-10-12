@@ -188,6 +188,7 @@ function resolveRound(){
   else if(round>=15){gameOver=true;const max=Math.max(...players.map(p=>p.score));const top=players.filter(p=>p.score===max);$("endText").textContent=top.length===1?`🏆 ${top[0].name} の勝利！ ${max}pt`:`引き分け！最高得点 ${max}pt`;log("15ラウンド終了！得点で勝敗決定。")}
   else {round++;actions={};locked=false;for(const p of players)if(p.hp<=0)p.online=false;log(`ROUND ${round} 開始！`)}
   broadcast();renderGame();
+}
 $("createBtn").addEventListener("click",()=>{
   alert("ルーム作成を開始するよ！");
   join(codegen(),true);
