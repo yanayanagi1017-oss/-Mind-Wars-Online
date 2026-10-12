@@ -217,6 +217,30 @@ $("lockBtn").addEventListener("click",()=>{
   renderGame();
 });
 $("rematchBtn").addEventListener("click",()=>{if(room){try{room.leave()}catch(e){}}room=null;resetView();$("nickname").focus()});
+
+function resetView(){
+  room=null;
+  roomCode="";
+  myId="";
+  isHost=false;
+  phase="home";
+  round=1;
+  actions={};
+  chosen="attack";
+  targetId="";
+  gameOver=false;
+  locked=false;
+  players=[];
+  peerIds=[];
+  stateVersion=0;
+  roundLog=[];
+
+  show("home");
+  hide("lobby");
+  hide("game");
+  hide("joinArea");
+}
+
 </script>
 </body>
 </html>
