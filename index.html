@@ -189,9 +189,15 @@ function resolveRound(){
   else {round++;actions={};locked=false;for(const p of players)if(p.hp<=0)p.online=false;log(`ROUND ${round} 開始！`)}
   broadcast();renderGame();
 }
-$("createBtn").addEventListener("click",()=>{
+$("createBtn").addEventListener("click",async()=>{
   alert("ルーム作成を開始するよ！");
-  join(codegen(),true);
+  try {
+    await join(codegen(),true);
+  } catch(e) {
+    console.error("ルーム作成エラー:",e);
+    alert("ルーム作成中にエラーが発生したよ。\n" +
+      (e?.stack || e?.message || String(e)));
+  }
 });
 $("showJoin").addEventListener("click",()=>show("joinArea"));
 $("joinBtn").addEventListener("click",()=>{const c=$("joinCode").value.trim().toUpperCase();if(c.length<4){alert("参加コードを入力してね");return}join(c,false)});
