@@ -51,7 +51,7 @@ h2{font-size:18px;margin:0 0 12px}label{display:block;font-size:13px;color:var(-
 <div class="footer">Mind Wars Online • ブラウザ試作版 • 接続にはインターネットが必要です</div>
 </main>
 <script type="module">
-import { joinRoom } from "https://esm.sh/@trystero-p2p/torrent";
+let joinRoom = null;
 const $=id=>document.getElementById(id);
 const COLORS=["#ff637d","#63b3ff","#ffe16a"];
 const COST={attack:2,defend:1,charge:0,steal:3,heal:2};
