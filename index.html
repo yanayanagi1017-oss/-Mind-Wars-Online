@@ -67,7 +67,7 @@ function show(id){$(id).classList.remove("hidden")} function hide(id){$(id).clas
 function log(msg){roundLog.unshift(msg);roundLog=roundLog.slice(0,8);$("feed").innerHTML=roundLog.map(x=>`<div>${escapeHtml(x)}</div>`).join("")}
 function currentSnapshot(){return {type:"state",players,phase,round,gameOver,roundLog,version:++stateVersion,lockedIds:Object.keys(actions),endText:$("endText").textContent}}
 function broadcast(){if(!isHost)return;const s=currentSnapshot();sendLobby(s);sendResult(s);renderLobby();if(phase==="game")renderGame()}
-function join(code,host){
+async function join(code,host){
   if(room){try{room.leave()}catch(e){}}
   roomCode=code.toUpperCase();isHost=host;myId=uid();phase="lobby";round=1;actions={};gameOver=false;locked=false;roundLog=[];stateVersion=0;
   const name=$("nickname").value.trim()||"プレイヤー";
