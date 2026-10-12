@@ -89,6 +89,8 @@ async function join(code,host){
   return;
 }
   try{room=joinRoom({appId:"mind-wars-online-demo-v1"},roomCode)}catch(e){alert("通信を開始できなかったよ。ページを再読み込みして試してね。");return}
+ console.log("通信ルーム:", room);
+console.log("makeAction:", room.makeAction);
   [sendLobby,getLobby]=room.makeAction("lobby");
   [sendIntent,getIntent]=room.makeAction("intent");
   [sendStart,getStart]=room.makeAction("start");
