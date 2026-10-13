@@ -139,6 +139,7 @@ function renderLobby(){
 function startGame(){
   if(!isHost||players.length!==3)return;
   phase="game";round=1;actions={};locked=false;gameOver=false;roundLog=[];
+  hide("endCard");
   players.forEach(p=>{p.hp=10;p.energy=5;p.score=0;p.online=true});
   sendStart({type:"begin",players,round,roundLog});broadcast();hide("lobby");show("game");renderGame();log("ゲーム開始！作戦を選ぼう。");broadcast();
 }
