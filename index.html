@@ -358,7 +358,7 @@ const MWAudio=(()=>{
     if(!AudioContextClass){statusText.textContent="このブラウザでは音声生成に対応していないよ。";return}
     ctx=new AudioContextClass();master=ctx.createGain();master.gain.value=Number(volumeControl.value)/100*.35;master.connect(ctx.destination);
   }
-  function tone(freq,duration=.15,type="sine",volume=.25,delay=0){
+  function tone(freq,duration=.15,type="sine",volume=.100,delay=0){
     if(!enabled||!ctx||!master)return;
     const now=ctx.currentTime+delay,osc=ctx.createOscillator(),gain=ctx.createGain();
     osc.type=type;osc.frequency.setValueAtTime(Math.max(30,freq),now);
